@@ -32,6 +32,7 @@ class MoneyManager extends Component {
 
   moneyDetail = () => {
     const {balanceInput, incomeInput, expensesInput} = this.state
+
     const moneyCollection = {
       balance: balanceInput,
       income: incomeInput,
@@ -47,14 +48,23 @@ class MoneyManager extends Component {
   onAddTransaction = event => {
     event.preventDefault()
     const {titleInput, amountInput, activeId} = this.state
+    let typeValue = null
+    if (activeId === 'INCOME') {
+      typeValue = 'Income'
+    } else {
+      typeValue = 'Expenses'
+    }
     const newTransaction = {
       id: uuidv4(),
       title: titleInput,
-      amount: amountInput,
-      type: activeId,
+      amount: parseInt(amountInput),
+      type: typeValue,
     }
     this.setState(prevState => ({
       transactionList: [...prevState.transactionList, newTransaction],
+      titleInput: '',
+      amountInput: '',
+      activeId: transactionTypeOptions[0].optionId,
     }))
     if (activeId === 'INCOME') {
       this.setState(prevState => ({
@@ -63,41 +73,56 @@ class MoneyManager extends Component {
       this.setState(prevState => ({
         balanceInput: prevState.balanceInput + parseInt(amountInput),
       }))
+    } else {
+      this.setState(prevState => ({
+        expensesInput: prevState.expensesInput + parseInt(amountInput),
+      }))
+      this.setState(prevState => ({
+        balanceInput: prevState.balanceInput - parseInt(amountInput),
+      }))
     }
-    this.setState(prevState => ({
-      expensesInput: prevState.expensesInput + parseInt(amountInput),
-    }))
-    this.setState(prevState => ({
-      balanceInput: prevState.balanceInput - parseInt(amountInput),
-    }))
+  }
+
+  onChangeTitle = event => {
+    this.setState({titleInput: event.target.value})
+  }
+
+  onChangeAmount = event => {
+    this.setState({amountInput: event.target.value})
   }
 
   deleteTransaction = id => {
     const {transactionList} = this.state
     const filteredTransaction = transactionList.filter(each => each.id === id)
+    console.log(filteredTransaction)
     const filtered = filteredTransaction[0]
-    if (filtered.type === 'INCOME') {
+    console.log(filtered)
+    if (filtered.type === 'Income') {
       this.setState(prevState => ({
-        incomeInput: prevState.incomeInput - parseInt(filtered.amountInput),
-      }))
-      this.setState(prevState => ({
-        balanceInput: prevState.balanceInput - parseInt(filtered.amountInput),
+        incomeInput: prevState.incomeInput - parseInt(filtered.amount),
+        balanceInput: prevState.balanceInput - parseInt(filtered.amount),
       }))
     } else {
       this.setState(prevState => ({
-        expensesInput: prevState.expensesInput - parseInt(filtered.amountInput),
-      }))
-      this.setState(prevState => ({
-        balanceInput: prevState.balanceInput - parseInt(filtered.amountInput),
+        expensesInput: prevState.expensesInput - parseInt(filtered.amount),
+        balanceInput: prevState.balanceInput + parseInt(filtered.amount),
       }))
     }
     this.setState(prevState => ({
-      transactionList: prevState.transactionList.map(each => each.id !== id),
+      transactionList: prevState.transactionList.filter(each => each.id !== id),
     }))
   }
 
   render() {
-    const {titleInput, amountInput, activeId, transactionList} = this.state
+    const {
+      titleInput,
+      amountInput,
+      activeId,
+      transactionList,
+      balanceInput,
+      incomeInput,
+      expensesInput,
+    } = this.state
     return (
       <div className="app-container">
         <div className="app-header">
@@ -106,7 +131,11 @@ class MoneyManager extends Component {
             Welcome back to your <span className="account">Money Manager</span>{' '}
           </p>
         </div>
-        <MoneyDetails moneyDetail={this.moneyDetail} />
+        <MoneyDetails
+          balanceInput={balanceInput}
+          incomeInput={incomeInput}
+          expensesInput={expensesInput}
+        />
         <div className="transaction-footer">
           <form className="form-container" onSubmit={this.onAddTransaction}>
             <h1 className="heading2">Add Transaction</h1>
@@ -119,6 +148,7 @@ class MoneyManager extends Component {
               placeholder="TITLE"
               className="input"
               value={titleInput}
+              onChange={this.onChangeTitle}
             />
             <label htmlFor="amount" className="label-text">
               AMOUNT
@@ -129,6 +159,7 @@ class MoneyManager extends Component {
               placeholder="AMOUNT"
               className="input"
               value={amountInput}
+              onChange={this.onChangeAmount}
             />
             <label htmlFor="type" className="label-text">
               TYPE

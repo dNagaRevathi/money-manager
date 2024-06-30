@@ -1,11 +1,11 @@
 .list-item {
   display: flex;
+  justify-content: space-around;
   border: 2px solid #d7dfe9;
-  width: 300px;
 }
 .title-value {
   color: #334155;
-  font-size: 15px;
+  font-size: 12px;
   font-family: 'Roboto';
 }
 .delete {

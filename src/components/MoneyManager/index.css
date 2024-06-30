@@ -137,4 +137,7 @@
 .transaction-container {
   display: flex;
   flex-direction: column;
+  width: 270px;
+  padding-left: 0px;
+  padding-right: 10px;
 }
